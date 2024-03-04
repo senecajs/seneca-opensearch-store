@@ -24,3 +24,5 @@ lcov.info
 test/coverage.html
 
 
+.env.local
+coverage/

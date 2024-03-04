@@ -1,11 +1,11 @@
 ![Seneca](http://senecajs.org/files/assets/seneca-logo.png)
 > A [Seneca.js][] data storage plugin.
 
-# seneca-mem-store
+# SenecaOpensearchStore
 [![npm version][npm-badge]][npm-url]
-[![Build](https://github.com/senecajs/seneca-mem-store/actions/workflows/build.yml/badge.svg)](https://github.com/senecajs/seneca-mem-store/actions/workflows/build.yml)
+[![Build](https://github.com/senecajs/SenecaOpensearchStore/actions/workflows/build.yml/badge.svg)](https://github.com/senecajs/seneca-OpensearchStore/actions/workflows/build.yml)
 [![Dependency Status][david-badge]][david-url]
-[![Maintainability](https://api.codeclimate.com/v1/badges/e2cdcc5415161cb378b0/maintainability)](https://codeclimate.com/github/senecajs/seneca-mem-store/maintainability)
+[![Maintainability](https://api.codeclimate.com/v1/badges/e2cdcc5415161cb378b0/maintainability)](https://codeclimate.com/github/senecajs/SenecaOpensearchStore/maintainability)
 [![DeepScan grade](https://deepscan.io/api/teams/5016/projects/17225/branches/388415/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5016&pid=17225&bid=388415)
 [![Coveralls][BadgeCoveralls]][Coveralls]
 
@@ -41,7 +41,7 @@ tutorials to sample apps to help get you up and running quickly.
 
 ## Code examples
 
-For code samples, please see the [tests][mem-store-tests] for this plugin.
+For code samples, please see the [tests][OpensearchStore-tests] for this plugin.
 
 ### Seneca compatibility
 Supports Seneca versions **2.x** and above
@@ -54,7 +54,7 @@ All Seneca data store supported functionality is implemented in [seneca-store-te
 
 ```sh
 npm install seneca
-npm install seneca-mem-store
+npm install SenecaOpensearchStore
 ```
 
 You'll need the [seneca](http://github.com/senecajs/seneca) toolkit to use this module - it's just a plugin.
@@ -67,7 +67,7 @@ var seneca = require('seneca')()
 seneca.use('basic')
 .use('entity')
 
-// Since mem-store is a default plugin, it does not need to be
+// Since OpensearchStore is a default plugin, it does not need to be
 // added with .use(). You can just go ahead and use it.
 seneca.ready(function () {
   var apple = seneca.make$('fruit')
@@ -131,22 +131,22 @@ Copyright (c) 2010-2014, Richard Rodger.
 Licensed under [MIT][].
 
 [MIT]: ./LICENSE
-[npm-badge]: https://badge.fury.io/js/seneca-mem-store.svg
-[npm-url]: https://badge.fury.io/js/seneca-mem-store
+[npm-badge]: https://badge.fury.io/js/SenecaOpensearchStore.svg
+[npm-url]: https://badge.fury.io/js/SenecaOpensearchStore
 [Senecajs org]: https://github.com/senecajs/
 [Seneca.js]: https://www.npmjs.com/package/seneca
 [@senecajs]: http://twitter.com/senecajs
 [senecajs.org]: http://senecajs.org/
-[travis-badge]: https://travis-ci.org/senecajs/seneca-mem-store.svg
-[travis-url]: https://travis-ci.org/senecajs/seneca-mem-store
+[travis-badge]: https://travis-ci.org/senecajs/SenecaOpensearchStore.svg
+[travis-url]: https://travis-ci.org/senecajs/SenecaOpensearchStore
 [gitter-badge]: https://badges.gitter.im/Join%20Chat.svg
 [gitter-url]: https://gitter.im/senecajs/seneca
-[github issue]: https://github.com/senecajs/seneca-mem-store/issues
+[github issue]: https://github.com/senecajs/SenecaOpensearchStore/issues
 [ActiveRecord-style data storage API]:http://senecajs.org/tutorials/understanding-data-entities.html
-[david-badge]: https://david-dm.org/senecajs/seneca-mem-store.svg
-[david-url]: https://david-dm.org/senecajs/seneca-mem-store
-[Coveralls]: https://coveralls.io/github/senecajs/seneca-mem-store?branch=master
-[BadgeCoveralls]: https://coveralls.io/repos/github/senecajs/seneca-mem-store/badge.svg?branch=master
+[david-badge]: https://david-dm.org/senecajs/SenecaOpensearchStore.svg
+[david-url]: https://david-dm.org/senecajs/SenecaOpensearchStore
+[Coveralls]: https://coveralls.io/github/senecajs/SenecaOpensearchStore?branch=master
+[BadgeCoveralls]: https://coveralls.io/repos/github/senecajs/SenecaOpensearchStore/badge.svg?branch=master
 [seneca-basic-url]: https://github.com/senecajs/seneca-basic
 [seneca-entity-url]: https://github.com/senecajs/seneca-entity
-[mem-store-tests]: https://github.com/senecajs/seneca-mem-store/tree/master/test
+[OpensearchStore-tests]: https://github.com/senecajs/SenecaOpensearchStore/tree/master/test
