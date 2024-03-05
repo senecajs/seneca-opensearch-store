@@ -1,8 +1,7 @@
 /* Copyright © 2024 Seneca Project Contributors, MIT License. */
 
 const docs = {
-  messages: {
-  }
+  messages: {},
 }
 
 export default docs

@@ -1,6 +1,5 @@
 /* Copyright (c) 2024 Seneca contributors, MIT License */
 
-
 import { AwsSigv4Signer } from '@opensearch-project/opensearch/aws'
 import { Client } from '@opensearch-project/opensearch'
 import { defaultProvider } from '@aws-sdk/credential-provider-node'
@@ -9,21 +8,20 @@ import { Gubu } from 'gubu'
 
 const { Open, Any } = Gubu
 
-
 type Options = {
   debug: boolean
   map?: any
   index: {
     prefix: string
     suffix: string
-    map: Record<string, string>,
+    map: Record<string, string>
     exact: string
-  },
+  }
   field: {
-    zone: { name: string },
-    base: { name: string },
-    name: { name: string },
-    vector: { name: string },
+    zone: { name: string }
+    base: { name: string }
+    name: { name: string }
+    vector: { name: string }
   }
   cmd: {
     list: {
@@ -36,7 +34,6 @@ type Options = {
 
 export type OpensearchStoreOptions = Partial<Options>
 
-
 function OpensearchStore(this: any, options: Options) {
   const seneca: any = this
 
@@ -45,7 +42,6 @@ function OpensearchStore(this: any, options: Options) {
   let desc: any = 'OpensearchStore'
 
   let client: any
-
 
   let store = {
     name: 'OpensearchStore',
@@ -61,19 +57,19 @@ function OpensearchStore(this: any, options: Options) {
 
       const fieldOpts: any = options.field
 
-        ;['zone', 'base', 'name']
-          .forEach((n: string) => {
-            if ('' != fieldOpts[n].name && null != canon[n] && '' != canon[n]) {
-              body[fieldOpts[n]] = canon[n]
-            }
-          })
+      ;['zone', 'base', 'name'].forEach((n: string) => {
+        if ('' != fieldOpts[n].name && null != canon[n] && '' != canon[n]) {
+          body[fieldOpts[n].name] = canon[n]
+        }
+      })
 
       const req = {
         index,
         body,
       }
 
-      client.index(req)
+      client
+        .index(req)
         .then((res: any) => {
           const body = res.body
           ent.data$(body._source)
@@ -82,7 +78,6 @@ function OpensearchStore(this: any, options: Options) {
         })
         .catch((err: any) => reply(err))
     },
-
 
     load: function (this: any, msg: any, reply: any) {
       // const seneca = this
@@ -94,10 +89,11 @@ function OpensearchStore(this: any, options: Options) {
       let q = msg.q || {}
 
       if (null != q.id) {
-        client.get({
-          index,
-          id: q.id
-        })
+        client
+          .get({
+            index,
+            id: q.id,
+          })
           .then((res: any) => {
             const body = res.body
             ent.data$(body._source)
@@ -112,56 +108,24 @@ function OpensearchStore(this: any, options: Options) {
 
             reply(err)
           })
-      }
-      else {
+      } else {
         reply()
       }
     },
-
 
     list: function (msg: any, reply: any) {
       // const seneca = this
       const ent = msg.ent
 
-      // const canon = ent.canon$({ object: true })
       const index = resolveIndex(ent, options)
+      const query = buildQuery({ index, options, msg })
 
-      let q = msg.q || {}
+      // console.log('LISTQ')
+      // console.dir(query, { depth: null })
 
-      let query: any = {
-        index,
-        body: {
-          size: msg.size$ || options.cmd.list.size,
-          _source: {
-            excludes:
-              [options.field.vector.name].filter(n => '' !== n)
-          },
-          query: {},
-        }
-      }
-
-      let excludeKeys: any = { directive$: 1, vector: 1 }
-
-      for (let k in q) {
-        if (!excludeKeys[k]) {
-          query.body.query.match = (query.body.query.match || {})
-          query.body.query.match[k] = q[k]
-        }
-      }
-
-      if (msg.vector$ || q.directive$?.vector$) {
-        query.body.query.knn = {
-          vector: { vector: q.vector, k: 15 }
-        }
-      }
-
-
-      // console.log('QUERY', query)
-
-      if (0 === Object.keys(query.body.query).length) {
+      if (null == query) {
         return reply([])
       }
-
 
       client
         .search(query)
@@ -170,7 +134,7 @@ function OpensearchStore(this: any, options: Options) {
           const list = hits.hits.map((entry: any) => {
             let item = ent.make$().data$(entry._source)
             item.id = entry._id
-            item.custom$({ score: entry._score })
+            item.custom$ = { score: entry._score }
             return item
           })
           reply(list)
@@ -180,48 +144,76 @@ function OpensearchStore(this: any, options: Options) {
         })
     },
 
-
+    // NOTE: all$:true is REQUIRED for deleteByQuery
     remove: function (this: any, msg: any, reply: any) {
       // const seneca = this
       const ent = msg.ent
 
-      // const canon = ent.canon$({ object: true })
       const index = resolveIndex(ent, options)
 
-      let q = msg.q || {}
+      const q = msg.q || {}
+      let id = q.id
+      let query
 
-      if (null != q.id) {
-        client.delete({
-          index,
-          id: q.id
-        })
+      if (null == id) {
+        query = buildQuery({ index, options, msg })
+
+        if (null == query || true !== q.all$) {
+          return reply(null)
+        }
+      }
+
+      // console.log('REMOVE', id)
+      // console.dir(query, { depth: null })
+
+      if (null != id) {
+        client
+          .delete({
+            index,
+            id,
+            // refresh: true,
+          })
           .then((_res: any) => {
             reply(null)
           })
           .catch((err: any) => {
             // Not found
             if (err.meta && 404 === err.meta.statusCode) {
-              reply(null)
+              return reply(null)
             }
 
             reply(err)
           })
-      }
-      else {
-        reply()
+      } else if (null != query && true === q.all$) {
+        client
+          .deleteByQuery({
+            index,
+            body: {
+              query,
+            },
+            // refresh: true,
+          })
+          .then((_res: any) => {
+            reply(null)
+          })
+          .catch((err: any) => {
+            // console.log('REM ERR', err)
+            reply(err)
+          })
+      } else {
+        reply(null)
       }
     },
-
 
     close: function (this: any, _msg: any, reply: any) {
       this.log.debug('close', desc)
       reply()
     },
 
-
+    // TODO: obsolete - remove from seneca entity
     native: function (this: any, _msg: any, reply: any) {
       reply(null, {
-        client: () => client
+        client: () => client,
       })
     },
   }
@@ -229,7 +221,6 @@ function OpensearchStore(this: any, options: Options) {
   let meta = init(seneca, options, store)
 
   desc = meta.desc
-
 
   seneca.prepare(async function (this: any) {
     const region = options.aws.region
@@ -242,9 +233,9 @@ function OpensearchStore(this: any, options: Options) {
         getCredentials: () => {
           const credentialsProvider = defaultProvider()
           return credentialsProvider()
-        }
+        },
       }),
-      node
+      node,
     })
   })
 
@@ -252,13 +243,67 @@ function OpensearchStore(this: any, options: Options) {
     name: store.name,
     tag: meta.tag,
     exportmap: {
-      native: () => ({
-        client
-      })
+      native: () => {
+        return { client }
+      },
     },
   }
 }
 
+function buildQuery(spec: { index: string; options: any; msg: any }) {
+  const { index, options, msg } = spec
+
+  const q = msg.q || {}
+
+  let query: any = {
+    index,
+    body: {
+      size: msg.size$ || options.cmd.list.size,
+      _source: {
+        excludes: [options.field.vector.name].filter((n) => '' !== n),
+      },
+      query: {},
+    },
+  }
+
+  let excludeKeys: any = { vector: 1 }
+
+  const parts = []
+
+  for (let k in q) {
+    if (!excludeKeys[k] && !k.match(/\$/)) {
+      parts.push({
+        match: { [k]: q[k] },
+      })
+    }
+  }
+
+  const vector$ = msg.vector$ || q.directive$?.vector$
+  if (vector$) {
+    parts.push({
+      knn: {
+        vector: {
+          vector: q.vector,
+          k: null == vector$.k ? 11 : vector$.k,
+        },
+      },
+    })
+  }
+
+  if (0 === parts.length) {
+    query = null
+  } else if (1 === parts.length) {
+    query.body.query = parts[0]
+  } else {
+    query.body.query = {
+      bool: {
+        must: parts,
+      },
+    }
+  }
+
+  return query
+}
 
 function resolveIndex(ent: any, options: Options) {
   let indexOpts = options.index
@@ -275,16 +320,17 @@ function resolveIndex(ent: any, options: Options) {
   let prefix = indexOpts.prefix
   let suffix = indexOpts.suffix
 
-  prefix = ('' == prefix || null == prefix) ? '' : prefix + '_'
-  suffix = ('' == suffix || null == suffix) ? '' : '_' + suffix
+  prefix = '' == prefix || null == prefix ? '' : prefix + '_'
+  suffix = '' == suffix || null == suffix ? '' : '_' + suffix
 
   // TOOD: need ent.canon$({ external: true }) : foo/bar -> foo_bar
-  let infix = ent.canon$({ string: true }).replace(/-\//g, '').replace(/\//g, '_')
+  let infix = ent
+    .canon$({ string: true })
+    .replace(/-\//g, '')
+    .replace(/\//g, '_')
 
   return prefix + infix + suffix
 }
-
-
 
 // Default options.
 const defaults: Options = {
@@ -312,14 +358,13 @@ const defaults: Options = {
   },
 
   aws: Open({
-    region: 'us-east-1'
+    region: 'us-east-1',
   }),
 
   opensearch: Open({
     node: 'NODE-URL',
   }),
 }
-
 
 Object.assign(OpensearchStore, {
   defaults,
@@ -331,4 +376,3 @@ export default OpensearchStore
 if ('undefined' !== typeof module) {
   module.exports = OpensearchStore
 }
-
