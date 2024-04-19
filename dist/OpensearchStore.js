@@ -211,7 +211,7 @@ function buildQuery(spec) {
             });
         }
     }
-    const vector$ = msg.vector$ || ((_a = q.directive$) === null || _a === void 0 ? void 0 : _a.vector$);
+    const vector$ = msg.vector$ || q.vector$ || ((_a = q.directive$) === null || _a === void 0 ? void 0 : _a.vector$);
     if (vector$) {
         parts.push({
             knn: {
@@ -238,9 +238,9 @@ function buildQuery(spec) {
     return query;
 }
 function resolveIndex(msg, options) {
-    var _a;
+    var _a, _b, _c;
     const ent = msg.ent;
-    const index = msg.index$ || ((_a = msg.q) === null || _a === void 0 ? void 0 : _a.index$);
+    const index = msg.index$ || ((_a = msg.q) === null || _a === void 0 ? void 0 : _a.index$) || ((_c = (_b = msg.q) === null || _b === void 0 ? void 0 : _b.directive$) === null || _c === void 0 ? void 0 : _c.index$);
     if (null != index) {
         return index;
     }

@@ -49,6 +49,8 @@ describe('OpensearchStore', () => {
 
     expect(resolveIndex({ ent: ent0, q: {}, index$: 'qaz' }, { index: {} })).toEqual('qaz')
     expect(resolveIndex({ ent: ent0, q: { index$: 'qaz' } }, { index: {} })).toEqual('qaz')
+    expect(resolveIndex({ ent: ent0, q: { directive$: { index$: 'qaz' } } }, { index: {} }))
+      .toEqual('qaz')
   }, 22222)
 
 

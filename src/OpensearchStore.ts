@@ -278,7 +278,7 @@ function buildQuery(spec: { index: string; options: any; msg: any }) {
     }
   }
 
-  const vector$ = msg.vector$ || q.directive$?.vector$
+  const vector$ = msg.vector$ || q.vector$ || q.directive$?.vector$
   if (vector$) {
     parts.push({
       knn: {
@@ -308,7 +308,7 @@ function buildQuery(spec: { index: string; options: any; msg: any }) {
 function resolveIndex(msg: any, options: Options) {
   const ent = msg.ent
 
-  const index = msg.index$ || msg.q?.index$
+  const index = msg.index$ || msg.q?.index$ || msg.q?.directive$?.index$
   if (null != index) {
     return index
   }
