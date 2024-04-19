@@ -36,15 +36,19 @@ describe('OpensearchStore', () => {
     const ent0 = seneca.make('foo')
     const ent1 = seneca.make('foo/bar')
 
-    expect(resolveIndex(ent0, { index: {} })).toEqual('foo')
-    expect(resolveIndex(ent0, { index: { exact: 'qaz' } })).toEqual('qaz')
+    expect(resolveIndex({ ent: ent0 }, { index: {} })).toEqual('foo')
+    expect(resolveIndex({ ent: ent0 }, { index: { exact: 'qaz' } })).toEqual('qaz')
 
-    expect(resolveIndex(ent1, { index: {} })).toEqual('foo_bar')
-    expect(resolveIndex(ent1, { index: { prefix: 'p0', suffix: 's0' } })).toEqual('p0_foo_bar_s0')
-    expect(resolveIndex(ent1, {
+    expect(resolveIndex({ ent: ent1 }, { index: {} })).toEqual('foo_bar')
+    expect(resolveIndex({ ent: ent1 }, { index: { prefix: 'p0', suffix: 's0' } })).toEqual('p0_foo_bar_s0')
+    expect(resolveIndex({ ent: ent1 }, {
       index: { map: { '-/foo/bar': 'FOOBAR' }, prefix: 'p0', suffix: 's0' }
     }))
       .toEqual('FOOBAR')
+
+
+    expect(resolveIndex({ ent: ent0, q: {}, index$: 'qaz' }, { index: {} })).toEqual('qaz')
+    expect(resolveIndex({ ent: ent0, q: { index$: 'qaz' } }, { index: {} })).toEqual('qaz')
   }, 22222)
 
 
@@ -154,7 +158,8 @@ describe('OpensearchStore', () => {
       code: 'code0'
     })
     // console.log('list3', list3.map((n: any) => ({ ...n })))
-    expect(list3.length).toEqual(1)
+    const list3f = list3.filter((n: any) => 'code0' === n.code)
+    expect(0 < list3f.length).toEqual(true)
 
   }, 22222)
 

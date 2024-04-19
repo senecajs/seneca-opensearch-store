@@ -17,7 +17,7 @@ function OpensearchStore(options) {
             // const seneca = this
             const ent = msg.ent;
             const canon = ent.canon$({ object: true });
-            const index = resolveIndex(ent, options);
+            const index = resolveIndex(msg, options);
             const body = ent.data$(false);
             const fieldOpts = options.field;
             ['zone', 'base', 'name'].forEach((n) => {
@@ -43,7 +43,7 @@ function OpensearchStore(options) {
             // const seneca = this
             const ent = msg.ent;
             // const canon = ent.canon$({ object: true })
-            const index = resolveIndex(ent, options);
+            const index = resolveIndex(msg, options);
             let q = msg.q || {};
             if (null != q.id) {
                 client
@@ -72,7 +72,7 @@ function OpensearchStore(options) {
         list: function (msg, reply) {
             // const seneca = this
             const ent = msg.ent;
-            const index = resolveIndex(ent, options);
+            const index = resolveIndex(msg, options);
             const query = buildQuery({ index, options, msg });
             // console.log('LISTQ')
             // console.dir(query, { depth: null })
@@ -99,7 +99,7 @@ function OpensearchStore(options) {
         remove: function (msg, reply) {
             // const seneca = this
             const ent = msg.ent;
-            const index = resolveIndex(ent, options);
+            const index = resolveIndex(msg, options);
             const q = msg.q || {};
             let id = q.id;
             let query;
@@ -237,7 +237,13 @@ function buildQuery(spec) {
     }
     return query;
 }
-function resolveIndex(ent, options) {
+function resolveIndex(msg, options) {
+    var _a;
+    const ent = msg.ent;
+    const index = msg.index$ || ((_a = msg.q) === null || _a === void 0 ? void 0 : _a.index$);
+    if (null != index) {
+        return index;
+    }
     let indexOpts = options.index;
     if ('' != indexOpts.exact && null != indexOpts.exact) {
         return indexOpts.exact;
