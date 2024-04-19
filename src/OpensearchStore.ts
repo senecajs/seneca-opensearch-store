@@ -57,11 +57,11 @@ function OpensearchStore(this: any, options: Options) {
 
       const fieldOpts: any = options.field
 
-        ;['zone', 'base', 'name'].forEach((n: string) => {
-          if ('' != fieldOpts[n].name && null != canon[n] && '' != canon[n]) {
-            body[fieldOpts[n].name] = canon[n]
-          }
-        })
+      ;['zone', 'base', 'name'].forEach((n: string) => {
+        if ('' != fieldOpts[n].name && null != canon[n] && '' != canon[n]) {
+          body[fieldOpts[n].name] = canon[n]
+        }
+      })
 
       const req = {
         index,
